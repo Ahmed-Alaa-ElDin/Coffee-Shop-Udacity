@@ -5,7 +5,7 @@ import json
 from flask_cors import CORS
 
 from .database.models import db_drop_and_create_all, setup_db, Drink
-from .auth.auth import AuthError, requires_auth
+from .auth.auth import AuthError, requires_auth, get_token_auth_header
 
 app = Flask(__name__)
 setup_db(app)
@@ -31,9 +31,11 @@ CORS(app)
 
 @app.route("/drinks", methods=["GET"])
 def puplic_drinks():
-    all_drinks = Drink.query.all()
-
-    short_drinks = [single_drink.short() for single_drink in all_drinks]
+    try:
+        all_drinks = Drink.query.all()
+        short_drinks = [single_drink.short() for single_drink in all_drinks]
+    except:
+        abort(404)
 
     return jsonify({
         'success': True,
@@ -52,10 +54,15 @@ def puplic_drinks():
 
 
 @app.route("/drinks-detail", methods=["GET"])
-def detailed_drinks():
-    all_drinks = Drink.query.all()
+@requires_auth("get:drinks-detail")
+def detailed_drinks(payload):
 
-    long_drinks = [single_drink.long() for single_drink in all_drinks]
+
+    try:
+        all_drinks = Drink.query.all()
+        long_drinks = [single_drink.long() for single_drink in all_drinks]
+    except:
+        abort(404)
 
     return jsonify({
         'success': True,
@@ -72,6 +79,22 @@ def detailed_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+
+@app.route("/drinks", methods=["POST"])
+@requires_auth("post:drinks")
+def post_drink():
+
+    try:
+         
+        all_drinks = Drink.query.all()
+        long_drinks = [single_drink.long() for single_drink in all_drinks]
+    except:
+        abort(404)
+
+    return jsonify({
+        'success': True,
+        'drinks': long_drinks
+    }), 200
 
 
 '''
