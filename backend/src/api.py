@@ -88,7 +88,7 @@ def post_drink(payload):
         get_data = request.get_json()
         new_drink = Drink(title=get_data["title"], recipe=json.dumps(get_data["recipe"]))
         
-        if get_data["id"]:
+        if get_data["id"] and get_data["id"] != -1:
             new_drink.id = get_data["id"]
             
         new_drink.insert()
