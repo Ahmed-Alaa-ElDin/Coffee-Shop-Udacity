@@ -24,8 +24,9 @@ CORS(app)
     GET /drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
+    returns status code 200 and json {"success": True, "drinks": drinks} where
+    drinks is the list of drinks
+    or appropriate status code indicating reason for failure
 '''
 
 
@@ -34,7 +35,8 @@ def puplic_drinks():
     try:
         all_drinks = Drink.query.all()
         short_drinks = [single_drink.short() for single_drink in all_drinks]
-    except:
+            
+    except Exception:
         abort(404)
 
     return jsonify({
@@ -48,7 +50,8 @@ def puplic_drinks():
     GET /drinks-detail
         it should require the 'get:drinks-detail' permission
         it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
+    returns status code 200 and json {"success": True, "drinks": drinks}
+    where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
 
@@ -60,7 +63,7 @@ def detailed_drinks(payload):
     try:
         all_drinks = Drink.query.all()
         long_drinks = [single_drink.long() for single_drink in all_drinks]
-    except:
+    except Exception:
         abort(404)
 
     return jsonify({
@@ -75,7 +78,8 @@ def detailed_drinks(payload):
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
         it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
+    returns status code 200 and json {"success": True, "drinks": drink}
+        where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
 
@@ -86,21 +90,20 @@ def post_drink(payload):
 
     try:
         get_data = request.get_json()
-        new_drink = Drink(title=get_data["title"], recipe=json.dumps(get_data["recipe"]))
-        
+        new_drink = Drink(title=get_data["title"], recipe=json.dumps(
+            get_data["recipe"]))
         if get_data["id"] and get_data["id"] != -1:
             new_drink.id = get_data["id"]
-            
         new_drink.insert()
         all_drinks = Drink.query.all()
         long_drinks = [single_drink.long() for single_drink in all_drinks]
-    except:
+    except Exception:
         abort(404)
 
     return jsonify({
         'success': True,
         'drinks': long_drinks
-    }), 200
+    }), 201
 
 
 '''
@@ -111,7 +114,8 @@ def post_drink(payload):
         it should update the corresponding row for <id>
         it should require the 'patch:drinks' permission
         it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
+    returns status code 200 and json {"success": True, "drinks": drink}
+    where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 
 '''
@@ -137,7 +141,7 @@ def edit_drink(payload, id):
         get_drink.update()
         all_drinks = Drink.query.all()
         long_drinks = [single_drink.long() for single_drink in all_drinks]
-    except:
+    except Exception:
         abort(404)
 
     return jsonify({
@@ -153,7 +157,8 @@ def edit_drink(payload, id):
         it should respond with a 404 error if <id> is not found
         it should delete the corresponding row for <id>
         it should require the 'delete:drinks' permission
-    returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
+    returns status code 200 and json {"success": True, "delete": id}
+    where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
 
@@ -171,7 +176,7 @@ def delete_drink(payload, id):
         get_drink.delete()
         all_drinks = Drink.query.all()
         long_drinks = [single_drink.long() for single_drink in all_drinks]
-    except:
+    except Exception:
         abort(404)
 
     return jsonify({
@@ -199,7 +204,7 @@ def unprocessable(error):
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
              jsonify({
-                    "success": False, 
+                    "success": False,
                     "error": 404,
                     "message": "resource not found"
                     }), 404
@@ -207,7 +212,7 @@ def unprocessable(error):
 '''
 '''
 @TODO implement error handler for 404
-    error handler should conform to general task above 
+    error handler should conform to general task above
 '''
 
 
@@ -219,11 +224,20 @@ def not_present(error):
         "message": "resource not found"
     }), 404
 
+@app.errorhandler(400)
+def not_present(error):
+    return jsonify({
+        "success": False,
+        "error": 400,
+        "message": "No Data Provided"
+    }), 400
+
 
 '''
 @TODO implement error handler for AuthError
-    error handler should conform to general task above 
+    error handler should conform to general task above
 '''
+
 
 @app.errorhandler(AuthError)
 def authentication_error(error):
